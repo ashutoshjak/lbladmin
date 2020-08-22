@@ -13,7 +13,7 @@ class RequestBook extends StatefulWidget {
 class _RequestBookState extends State<RequestBook> {
 
 
-  String url2 = "http://10.0.2.2/LibraryBookLocator/public/api/requestbooks";
+  String url2 = "http://192.168.100.7/LibraryBookLocator/public/api/requestbooks";
 
   Future<List<RequestsBook>> fetchRequestBook() async {
     final response = await http.get(url2);
@@ -56,19 +56,24 @@ class _RequestBookState extends State<RequestBook> {
       backgroundColor: Colors.brown[100],
       body: FutureBuilder(
         future: fetchRequestBook(),
-        builder: (BuildContext context, AsyncSnapshot<List<RequestsBook>> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
-            List<RequestsBook> requestbooks = snapshot.data;
-            return ListView(
-              children: requestbooks
-                  .map(
-                    (RequestsBook requestbook) => ListTile(
-                  title: Text(requestbook.bookName),
-                  subtitle: Text(requestbook.authorName),
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder:(BuildContext context, int index) {
+                  return ListTile(
+                      title: Text(snapshot.data[index].bookName),
+                      subtitle: Text(snapshot.data[index].authorName),
+                      onTap: (){
+                        Navigator.push(context,
+                            new MaterialPageRoute(builder: (context) => RequestBookDetailPage(snapshot.data[index]))
+                        );
 
-                ),
-              )
-                  .toList(),
+                      }
+
+                  );
+                }
+
             );
           } else {
             return Center(child: CircularProgressIndicator());
@@ -78,3 +83,58 @@ class _RequestBookState extends State<RequestBook> {
     );
   }
 }
+
+class RequestBookDetailPage extends StatelessWidget {
+
+  final RequestsBook book;
+
+  RequestBookDetailPage(this.book);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(book.bookName),
+        centerTitle: true,
+        backgroundColor: Colors.red,
+      ),
+      backgroundColor: Colors.brown[100],
+      body: Center(
+        child: Container(
+          child: Text(book.authorName),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
+//old body
+
+//body: FutureBuilder(
+//future: fetchRequestBook(),
+//builder: (BuildContext context, AsyncSnapshot<List<RequestsBook>> snapshot) {
+//if (snapshot.hasData) {
+//List<RequestsBook> requestbooks = snapshot.data;
+//return ListView(
+//children: requestbooks
+//    .map(
+//(RequestsBook requestbook) => ListTile(
+//title: Text(requestbook.bookName),
+//subtitle: Text(requestbook.authorName),
+//
+//),
+//)
+//    .toList(),
+//);
+//} else {
+//return Center(child: CircularProgressIndicator());
+//}
+//},
+//),

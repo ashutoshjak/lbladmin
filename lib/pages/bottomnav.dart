@@ -31,7 +31,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
       body: _children[_currentIndex],
 
       bottomNavigationBar: BottomNavigationBar(
-
+        backgroundColor: Colors.brown[100],
         type: BottomNavigationBarType.fixed,
         onTap:  onTappedBar,
 

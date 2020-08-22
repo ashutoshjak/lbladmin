@@ -18,7 +18,7 @@ class _AddBookState extends State<AddBook> {
   final _author_name = TextEditingController();
 
 
-  String url1 = "http://10.0.2.2/LibraryBookLocator/public/api/books";
+  String url1 = "http://192.168.100.7/LibraryBookLocator/public/api/books";
 
   Future<List<Book>> fetchBook() async {
     final response = await http.get(url1);
@@ -74,19 +74,24 @@ class _AddBookState extends State<AddBook> {
 
       body: FutureBuilder(
         future: fetchBook(),
-        builder: (BuildContext context, AsyncSnapshot<List<Book>> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
-            List<Book> books = snapshot.data;
-            return ListView(
-              children: books
-                  .map(
-                    (Book book) => ListTile(
-                  title: Text(book.bookName),
-                  subtitle: Text(book.authorName),
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder:(BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(snapshot.data[index].bookName),
+                    subtitle: Text(snapshot.data[index].authorName),
+                      onTap: (){
+                        Navigator.push(context,
+                            new MaterialPageRoute(builder: (context) => BookDetailPage(snapshot.data[index]))
+                        );
 
-                ),
-              )
-                  .toList(),
+                      }
+
+                  );
+                }
+
             );
           } else {
             return Center(child: CircularProgressIndicator());
@@ -97,6 +102,24 @@ class _AddBookState extends State<AddBook> {
 
   }
 
+
+//  ListView(
+//  children: books
+//      .map(
+//  (Book book) => ListTile(
+//  title: Text(book.bookName),
+//  subtitle: Text(book.authorName),
+////                      onTap: (){
+////                        Navigator.push(context,
+////                            new MaterialPageRoute(builder: (context) => DetailPage(snapshot.data[book.id]))
+////                        );
+////
+////                      }
+//
+//  ),
+//  )
+//      .toList(),
+//  );
 
 //===========ADD BOOK POPUP
 
@@ -305,5 +328,34 @@ class _AddBookState extends State<AddBook> {
     );
   }
 }
+
 //==============ADD DATA fucntion
+
+//Detailpage
+class BookDetailPage extends StatelessWidget {
+
+  final Book book;
+
+  BookDetailPage(this.book);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(book.bookName),
+          centerTitle: true,
+          backgroundColor: Colors.red,
+        ),
+      backgroundColor: Colors.brown[100],
+      body: Center(
+        child: Container(
+          child: Text(book.authorName),
+        ),
+      ),
+    );
+  }
+}
+
+
+
 
