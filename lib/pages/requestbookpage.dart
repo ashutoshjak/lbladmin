@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:lbladmin/models/requestbook.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:lbladmin/search/requestbooksearch.dart';
 
 
 class RequestBook extends StatefulWidget {
@@ -14,6 +15,9 @@ class _RequestBookState extends State<RequestBook> {
 
 
   String url2 = "http://192.168.100.7/LibraryBookLocator/public/api/requestbooks";
+
+
+
 
   Future<List<RequestsBook>> fetchRequestBook() async {
     final response = await http.get(url2);
@@ -49,6 +53,13 @@ class _RequestBookState extends State<RequestBook> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.search),onPressed: (){
+
+            showSearch(context: context, delegate: SearchRequestBook());
+
+          })
+        ],
         title: Text("Request Book"),
         centerTitle: true,
         backgroundColor: Colors.red,

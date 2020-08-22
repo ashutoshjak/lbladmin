@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:lbladmin/models/book.dart';
-
+import 'package:lbladmin/search/booksearch.dart';
 class AddBook extends StatefulWidget {
   @override
   _AddBookState createState() => _AddBookState();
@@ -59,6 +59,13 @@ class _AddBookState extends State<AddBook> {
         appBar: AppBar(
           title: Text("Add Book"),
           centerTitle: true,
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.search),onPressed: (){
+
+              showSearch(context: context, delegate: SearchBook());
+
+            })
+          ],
           backgroundColor: Colors.red,
         ),
         backgroundColor: Colors.brown[100],
