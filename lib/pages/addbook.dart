@@ -1,6 +1,8 @@
+import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:lbladmin/models/book.dart';
 
 class AddBook extends StatefulWidget {
   @override
@@ -9,76 +11,145 @@ class AddBook extends StatefulWidget {
 
 class _AddBookState extends State<AddBook> {
 
+
+  bool _isLoading = false;
+
   final _book_name = TextEditingController();
   final _author_name = TextEditingController();
+
+
+  String url1 = "http://10.0.2.2/LibraryBookLocator/public/api/books";
+
+  Future<List<Book>> fetchBook() async {
+    final response = await http.get(url1);
+
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      List<dynamic> body = jsonDecode(response.body);
+
+      List<Book> books = body
+          .map(
+            (dynamic item) => Book.fromJson(item),
+      )
+          .toList();
+
+      return books;
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load album');
+    }
+  }
+
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchBook();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("AddBook"),
+          title: Text("Add Book"),
           centerTitle: true,
           backgroundColor: Colors.red,
         ),
         backgroundColor: Colors.brown[100],
-        body: Container(
-          child: Stack(
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.red,
+          child:  Icon(Icons.add,),
+          onPressed: ShowDialog
+
+
+
+        ),
+
+
+      body: FutureBuilder(
+        future: fetchBook(),
+        builder: (BuildContext context, AsyncSnapshot<List<Book>> snapshot) {
+          if (snapshot.hasData) {
+            List<Book> books = snapshot.data;
+            return ListView(
+              children: books
+                  .map(
+                    (Book book) => ListTile(
+                  title: Text(book.bookName),
+                  subtitle: Text(book.authorName),
+
+                ),
+              )
+                  .toList(),
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+
+  }
+
+
+//===========ADD BOOK POPUP
+
+  void ShowDialog(){
+    showDialog(context: context,
+    builder:(BuildContext context){
+      return AlertDialog(
+        title: Text("Add Book"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Positioned(
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Card(
-                        elevation: 4.0,
-                        color: Colors.white,
-                        margin: EdgeInsets.only(left: 20, right: 20),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Form(
-                            //key: _formKey,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
+              Form(
+                //key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
 
-                                TextFormField(
-                                  controller: _book_name,
-                                  style: TextStyle(color: Color(0xFF000000)),
-                                  cursorColor: Color(0xFF9b9b9b),
-                                  keyboardType: TextInputType.text,
-                                  decoration: InputDecoration(
-                                    prefixIcon: Icon(
-                                      Icons.library_books,
-                                      color: Colors.grey,
-                                    ),
-                                    hintText: "Book Name",
-                                    hintStyle: TextStyle(
-                                        color: Color(0xFF9b9b9b),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
-                                  ),
+                    TextFormField(
+                      controller: _book_name,
+                      style: TextStyle(color: Color(0xFF000000)),
+                      cursorColor: Color(0xFF9b9b9b),
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.library_books,
+                          color: Colors.grey,
+                        ),
+                        hintText: "Book Name",
+                        hintStyle: TextStyle(
+                            color: Color(0xFF9b9b9b),
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal),
+                      ),
 
-                                ),
-                                TextFormField(
-                                  controller: _author_name,
-                                  style: TextStyle(color: Color(0xFF000000)),
-                                  cursorColor: Color(0xFF9b9b9b),
-                                  keyboardType: TextInputType.text,
-                                  decoration: InputDecoration(
-                                    prefixIcon: Icon(
-                                      Icons.person,
-                                      color: Colors.grey,
-                                    ),
-                                    hintText: "Author Name",
-                                    hintStyle: TextStyle(
-                                        color: Color(0xFF9b9b9b),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
+                    ),
+                    TextFormField(
+                      controller: _author_name,
+                      style: TextStyle(color: Color(0xFF000000)),
+                      cursorColor: Color(0xFF9b9b9b),
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Colors.grey,
+                        ),
+                        hintText: "Author Name",
+                        hintStyle: TextStyle(
+                            color: Color(0xFF9b9b9b),
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal),
+                      ),
+                    ),
 //                                TextFormField(
 //                                  style: TextStyle(color: Color(0xFF000000)),
 //                                  cursorColor: Color(0xFF9b9b9b),
@@ -130,35 +201,47 @@ class _AddBookState extends State<AddBook> {
 //                                  ),
 //
 //                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: FlatButton(
-                                      child: Text("Add Book",style: TextStyle(color: Colors.white),),
-                                      color: Colors.red,
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: FlatButton(
+                          child: Text(_isLoading? 'Proccessing...' : 'AddBook',
+                            textDirection: TextDirection.ltr,
+                            style: TextStyle(color: Colors.white),),
+                          color: Colors.red,
 
-                                      shape: new RoundedRectangleBorder(
-                                          borderRadius:
-                                          new BorderRadius.circular(20.0)),
-                                      onPressed: addData
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                          shape: new RoundedRectangleBorder(
+                              borderRadius:
+                              new BorderRadius.circular(20.0)),
+                          onPressed: addData
                       ),
-
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              )
+              ),
+
             ],
           ),
         )
+      );
+    }
+
     );
   }
+
+//===========ADD BOOK POPUP
+
+
+
+
+//==============ADD DATA fucntion
+
   void addData() async {
-    String url = "http://192.168.100.7/LibraryBookLocator/public/api/book";
+    setState(() {
+      _isLoading = true;
+    });
+
+    String url = "http://10.0.2.2/LibraryBookLocator/public/api/book";
+    //192.168.100.7 myip
     await http
         .post(url,
         headers: {'Accept': 'application/json'},
@@ -172,6 +255,10 @@ class _AddBookState extends State<AddBook> {
       } else {
         failed();
       }
+    });
+
+    setState(() {
+      _isLoading = false;
     });
   }
 
@@ -218,4 +305,5 @@ class _AddBookState extends State<AddBook> {
     );
   }
 }
+//==============ADD DATA fucntion
 

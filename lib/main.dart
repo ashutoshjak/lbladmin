@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lbladmin/pages/addbook.dart';
+import 'package:lbladmin/pages/bottomnav.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AddBook(),
+      home: MyBottomNavigationBar(),
       debugShowCheckedModeBanner: false,
     );
   }
