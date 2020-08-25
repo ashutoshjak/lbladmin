@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-
+import 'package:lbladmin/models/requestbook.dart';
 
 
 
 class SearchRequestBook extends SearchDelegate {
 
 
+  List<RequestsBook> requbook;
+
+  SearchRequestBook(this.requbook);
 
 
   @override
@@ -43,7 +46,50 @@ class SearchRequestBook extends SearchDelegate {
     // TODO: implement buildSuggestions
 
 
-    return Container();
+    final suggestionList = query.isEmpty
+        ? requbook
+        : requbook
+        .where((element) =>
+        element.bookName.toString().toLowerCase().startsWith(query))
+        .toList();
 
+    return ListView.builder(
+        itemCount: suggestionList.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(suggestionList[index].bookName),
+            subtitle: Text(suggestionList[index].authorName),
+              onTap: () {
+                Navigator.push(context,
+                    new MaterialPageRoute(builder: (context) =>
+                        RequestBookDetailPage(suggestionList[index]))
+                );
+              }
+          );
+        });
+
+  }
+}
+
+class RequestBookDetailPage extends StatelessWidget {
+  final RequestsBook book;
+
+  RequestBookDetailPage(this.book);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(book.bookName),
+        centerTitle: true,
+        backgroundColor: Colors.red,
+      ),
+      backgroundColor: Colors.brown[100],
+      body: Center(
+        child: Container(
+          child: Text(book.authorName),
+        ),
+      ),
+    );
   }
 }

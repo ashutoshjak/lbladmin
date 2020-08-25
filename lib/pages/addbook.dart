@@ -14,41 +14,109 @@ class _AddBookState extends State<AddBook> {
 
   bool _isLoading = false;
 
+  bool isLoading=false;
+
+
+
   final _book_name = TextEditingController();
   final _author_name = TextEditingController();
 
 
   String url1 = "http://192.168.100.7/LibraryBookLocator/public/api/books";
 
+//  Future<List<Book>> fetchBook() async {
+//    final response = await http.get(url1);
+//
+//    if (response.statusCode == 200) {
+//      // If the server did return a 200 OK response,
+//      // then parse the JSON.
+//      List<dynamic> body = jsonDecode(response.body);
+//
+//      List<Book> books = body
+//          .map(
+//            (dynamic item) => Book.fromJson(item),
+//      )
+//          .toList();
+//
+//      return books;
+//    } else {
+//      // If the server did not return a 200 OK response,
+//      // then throw an exception.
+//      throw Exception('Failed to load ');
+//    }
+//  }
+//
+//
+//  @override
+//  void initState() {
+//    super.initState();
+//    fetchBook();
+//  }
+
+//new old body
+//body: FutureBuilder(
+//future: fetchBook(),
+//builder: (BuildContext context, AsyncSnapshot snapshot) {
+//if (snapshot.hasData) {
+//return ListView.builder(
+//itemCount: snapshot.data.length,
+//itemBuilder:(BuildContext context, int index) {
+//return ListTile(
+//title: Text(snapshot.data[index].bookName),
+//subtitle: Text(snapshot.data[index].authorName),
+//onTap: (){
+//Navigator.push(context,
+//new MaterialPageRoute(builder: (context) => RequestBookDetailPage(snapshot.data[index]))
+//);
+//
+//}
+//
+//);
+//}
+//
+//);
+//} else {
+//return Center(child: CircularProgressIndicator());
+//}
+//},
+//),
+
+
   Future<List<Book>> fetchBook() async {
-    final response = await http.get(url1);
-
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      List<dynamic> body = jsonDecode(response.body);
-
-      List<Book> books = body
-          .map(
-            (dynamic item) => Book.fromJson(item),
-      )
-          .toList();
-
-      return books;
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load album');
+    try {
+      final response = await http.get(url1);
+      if (response.statusCode == 200) {
+        List<Book> book = parseRequestBooks(response.body);
+        return book;
+      } else {
+        throw Exception("error");
+      }
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 
+  List<Book> parseRequestBooks(String responseBody) {
+    final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+    {
+      return parsed
+          .map<Book>((json) => Book.fromJson(json))
+          .toList();
+    }
+  }
 
-
+  List<Book> book = List();
 
   @override
   void initState() {
     super.initState();
-    fetchBook();
+    isLoading = true;
+    fetchBook().then((booksFromServer) {
+      setState(() {
+        isLoading = false;
+        book = booksFromServer;
+      });
+    });
   }
 
 
@@ -62,7 +130,7 @@ class _AddBookState extends State<AddBook> {
           actions: <Widget>[
             IconButton(icon: Icon(Icons.search),onPressed: (){
 
-              showSearch(context: context, delegate: SearchBook());
+              showSearch(context: context, delegate: SearchBook(book));
 
             })
           ],
@@ -74,59 +142,33 @@ class _AddBookState extends State<AddBook> {
           child:  Icon(Icons.add,),
           onPressed: ShowDialog
 
-
-
         ),
 
 
-      body: FutureBuilder(
-        future: fetchBook(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder:(BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(snapshot.data[index].bookName),
-                    subtitle: Text(snapshot.data[index].authorName),
-                      onTap: (){
-                        Navigator.push(context,
-                            new MaterialPageRoute(builder: (context) => BookDetailPage(snapshot.data[index]))
-                        );
-
-                      }
-
-                  );
-                }
-
-            );
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+        body: isLoading
+            ? Center(
+          child: CircularProgressIndicator(),
+        )
+            : ListView.builder(
+          itemCount: book == null ? 0 : book.length,
+          itemBuilder: (BuildContext context, index) {
+            return ListTile(
+                title: Text(book[index].bookName),
+                subtitle: Text(book[index].authorName),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      new MaterialPageRoute(
+                          builder: (context) =>
+                              BookDetailPage(book[index])));
+                });
+          },
+        )
     );
 
   }
 
 
-//  ListView(
-//  children: books
-//      .map(
-//  (Book book) => ListTile(
-//  title: Text(book.bookName),
-//  subtitle: Text(book.authorName),
-////                      onTap: (){
-////                        Navigator.push(context,
-////                            new MaterialPageRoute(builder: (context) => DetailPage(snapshot.data[book.id]))
-////                        );
-////
-////                      }
-//
-//  ),
-//  )
-//      .toList(),
-//  );
 
 //===========ADD BOOK POPUP
 
@@ -270,8 +312,9 @@ class _AddBookState extends State<AddBook> {
       _isLoading = true;
     });
 
-    String url = "http://10.0.2.2/LibraryBookLocator/public/api/book";
+    String url = "http://192.168.100.7/LibraryBookLocator/public/api/book";
     //192.168.100.7 myip
+    //emulator ip 10.0.2.2
     await http
         .post(url,
         headers: {'Accept': 'application/json'},
