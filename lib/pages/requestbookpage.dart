@@ -108,16 +108,20 @@ class _RequestBookState extends State<RequestBook> {
             : ListView.builder(
                 itemCount: reqbook == null ? 0 : reqbook.length,
                 itemBuilder: (BuildContext context, index) {
-                  return ListTile(
-                      title: Text(reqbook[index].bookName),
-                      subtitle: Text(reqbook[index].authorName),
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            new MaterialPageRoute(
-                                builder: (context) =>
-                                    RequestBookDetailPage(reqbook[index])));
-                      });
+                  return Card(
+                    color: Colors.brown[100],
+                    child: ListTile(
+                        title: Text(reqbook[index].bookName),
+                        subtitle: Text(reqbook[index].authorName),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) =>
+                                      RequestBookDetailPage(reqbook[index])));
+                        }
+                    ),
+                  );
                 },
               )
     );
@@ -151,8 +155,45 @@ class RequestBookDetailPage extends StatelessWidget {
 
   RequestBookDetailPage(this.book);
 
+
+
   @override
   Widget build(BuildContext context) {
+
+    void deleteRequestBook(RequestsBook book) async {
+      String url3 = "http://192.168.100.7/LibraryBookLocator/public/api/deleterequestbook/${book.id}";
+
+      final response = await http.get(url3);
+      if (response.statusCode == 200) {
+//      BuildContext context;
+
+        Navigator.push(context, MaterialPageRoute(
+            builder: (context)=>RequestBook()
+        ));
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // return object of type Dialog
+            return AlertDialog(
+              title: new Text("deleted:${book.bookName}"),
+              actions: <Widget>[
+                // usually buttons at the bottom of the dialog
+                new FlatButton(
+                  child: new Text("Close"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+
+
+      }
+
+
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(book.bookName),
@@ -160,13 +201,60 @@ class RequestBookDetailPage extends StatelessWidget {
         backgroundColor: Colors.red,
       ),
       backgroundColor: Colors.brown[100],
-      body: Center(
-        child: Container(
-          child: Text(book.authorName),
-        ),
-      ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  Center(
+                    child: Row(
+                      children: <Widget>[
+
+
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(95.0, 10.0, 0, 10.0),
+                          child: Text('Author Name: ${book.authorName}',style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold
+                          ),),
+                        ),
+
+
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+//                      RaisedButton(
+//                        color: Colors.grey,
+//                        child: Text('Update',style: TextStyle(
+//                            color: Colors.white
+//                        ),),
+//                      ),
+                      RaisedButton(
+                        color: Colors.red,
+                        child: Text('Delete',style: TextStyle(
+                            color: Colors.white
+                        ),
+                        ),
+                        onPressed: (){
+                          deleteRequestBook(book);
+                        },
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        )
     );
   }
+
+
+
 }
 
 //new old body
