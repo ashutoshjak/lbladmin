@@ -504,6 +504,9 @@ class _AddBookState extends State<AddBook> {
           "author_name": _author_name.text,
         }))
         .then((response) {
+      Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>AddBook()
+      ));
       if (response.statusCode == 201) {
         success();
       } else {
