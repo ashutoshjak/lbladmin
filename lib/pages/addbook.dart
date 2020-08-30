@@ -911,8 +911,11 @@ class BookDetailPage extends StatelessWidget {
                             'Author Name: ${book.authorName}', style: TextStyle(
                               fontSize: 20.0,
                               fontWeight: FontWeight.bold
-                          ),),
+                          ),
+                          ),
                         ),
+
+
 
 
                       ],
@@ -942,6 +945,24 @@ class BookDetailPage extends StatelessWidget {
                           },
                       )
                     ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Center(child: Image.network(book.shelfImage,width: 300,height: 600,),),
+                    ],
+                  ),
+
+                  Row(
+                    children: <Widget>[
+                      FlatButton(
+                        child: Text("Next page"),
+                        onPressed: (){
+                          Navigator.push(context,
+new MaterialPageRoute(builder: (context) => NextPage(book: book)));
+
+                        },
+                      )
+                    ],
                   )
 
                 ],
@@ -953,5 +974,23 @@ class BookDetailPage extends StatelessWidget {
   }
 
 
-
 }
+
+class NextPage extends StatelessWidget {
+
+  final Book book;
+
+  NextPage({this.book});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+
+      body: Row(
+        children: <Widget>[
+          Image.network(book.bookImage,width: 350,height: 400,),
+        ],
+      ),
+    );
+  }
+}
+
